@@ -27,20 +27,23 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Pass -DUNICODE to compile for unicode.
+//
+// Use LPTSTR, TCHAR and TEXT() macro to ensure compatibility with two encoding
+// systems without code being changed.
 
 #include <windows.h>
 
 // Define prototype of window procedure.
-LRESULT CALLBACK WindowProc(HWND   hWnd, 
-                            UINT   uMsg, 
-                            WPARAM wParam, 
-                            LPARAM lParam);
+LRESULT CALLBACK WindowProc(HWND   hWnd,     // - Window handle
+                            UINT   uMsg,     // - Message ID
+                            WPARAM wParam,   // - 1st parameter
+                            LPARAM lParam);  // - 2nd parameter
 
 // Application entry point.
-int WINAPI _tWinMain(HINSTANCE hInstance, 
-                     HINSTANCE hPrevInstance,
-                     LPTSTR    lpCmdLine,
-                     int       nCmdShow)
+int WINAPI _tWinMain(HINSTANCE hInstance,    // - Instance handle
+                     HINSTANCE hPrevInstance,// - Not used in Win32.
+                     LPTSTR    lpCmdLine,    // - Command line pointer.
+                     int       nCmdShow)     // - Window visibility?
 {
     LPTSTR szClassName = TEXT("CVirgoSample");
 
@@ -95,7 +98,44 @@ int WINAPI _tWinMain(HINSTANCE hInstance,
                                                              //
                                 NULL                         // - Additional ap
                                                              // plication data
+                                                             //
+                                                             // * We can use th
+                                                             // is field to sto
+                                                             // re C++ window c
+                                                             // lass instance.
                                 ); // HWND hWnd = CreateWindowEx()
 
-
+    if (hWnd == NULL)                        // 5. Check if window has been cre
+    {                                        // ated successfully.
+                                             //
+        return 1;                            // Shut the program down if it has
+    }                                        // been unsuccessful.
+                                             //
+    ShowWindow(hWnd, nCmdShow);              // Bring it onto display if succee
+                                             // ded.
+    MSG msg = { };                           //
+    BOOL bMsgRet;                            // 6. Start receiving messages sen
+                                             // t to our main window.
+                                             //
+    while ((bMsgRet = GetMessage(&msg,       // - Pointer to message structure 
+                                             // to be filled in.
+                                 hWnd,       // - The window handle whose mess
+                                             // ages we are interested in.
+                                 0,          // - Message ID lower bound.
+                                 0)          // - Message ID higher bound.
+                                             //
+                                ) != 0)      // Loop unless exit message has be
+                                             // en sent (returns 0 in that situ
+                                             // ation).
+    {                                        //
+        if (bMsgRet == -1)
+        {
+            // Handle the error here!
+        }
+        else
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+    }
 }
